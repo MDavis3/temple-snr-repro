@@ -1,0 +1,6 @@
+# core (get_data.py, temple_snr.py); tested with CPython 3.14.4 on macOS arm64
+numpy==2.5.4
+scipy==1.18.1
+h5py==3.16.0
+hdf5plugin==7.1.0
+matplotlib==3.11.2

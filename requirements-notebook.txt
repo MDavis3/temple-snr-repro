@@ -1,0 +1,5 @@
+# everything in requirements.txt plus what is needed to open and run temple_snr.ipynb
+-r requirements.txt
+notebook==7.6.3
+ipykernel==7.4.0
+nbconvert==7.17.2

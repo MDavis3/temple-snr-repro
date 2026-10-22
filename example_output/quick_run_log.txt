@@ -1,0 +1,42 @@
+
+PIP_SECONDS 11
+
+
+SP01-Left-1: VERIFIED  chunks=4256 decode_fail=0 stored_mismatch=0 size_ok=True refetch 32/32 identical, 0.94 GB
+
+
+SP02-Left-1: VERIFIED  chunks=4256 decode_fail=0 stored_mismatch=0 size_ok=True refetch 32/32 identical, 0.92 GB
+
+
+SP03-Left: VERIFIED  chunks=4256 decode_fail=0 stored_mismatch=0 size_ok=True refetch 32/32 identical, 0.91 GB
+
+
+SP04-Left-1: VERIFIED  chunks=4256 decode_fail=0 stored_mismatch=0 size_ok=True refetch 32/32 identical, 1.00 GB
+done in 3.5 min; verified 4/4
+GET_DATA_SECONDS 216
+selftest  S30-60 E: -22.0 dB (target -22.0) ok
+selftest  S30-60 X: -21.8 dB (target -22.0) ok
+selftest      P1 E: -22.9 dB (target -22.0) (info)
+selftest      P1 X: -21.9 dB (target -22.0) (info)
+selftest      P2 E: -21.8 dB (target -22.0) (info)
+selftest      P2 X: -22.0 dB (target -22.0) (info)
+selftest C_min 20.3 dB; overall PASS
+SELFTEST_SECONDS 46
+SP01-Left-1: P1 E -16.8 dB, C_min 13.7 dB (8 s)
+SP02-Left-1: P1 E -22.1 dB, C_min 11.4 dB (6 s)
+SP03-Left: P1 E -21.7 dB, C_min 21.0 dB (6 s)
+SP04-Left-1: P1 E -18.6 dB, C_min 3.7 dB (6 s)
+
+Contrast-free blood SNR, dB per element per transmit (median over valid elements)
+recording      Cmin incl  nP1   P1 E   P1 X P1 no-notch   P2 E   P2 X  |   G30   G35   G40   G45   G50   G55
+SP01-Left-1    13.7  yes  256  -16.8  -17.9       -16.1  -18.2  -20.3  | -13.8 -14.0 -18.2 -21.3 -23.2 -22.8
+SP02-Left-1    11.4  yes  256  -22.1  -23.3       -21.1  -24.5  -25.2  | -17.3 -21.4 -24.5 -25.5 -30.9 -23.4
+SP03-Left      21.0  yes  256  -21.7  -20.8       -21.0  -20.3  -19.8  | -10.5 -19.3 -20.3 -16.0 -14.4 -14.0
+SP04-Left-1     3.7   no  255  -18.6  -19.5       -16.6  -18.6  -19.6  | -23.3 -19.9 -18.6 -19.2 -21.2 -21.0
+Cmin = contamination check, min over gate shifts of contrast/pre-bolus blood-band power, 30-60 mm (dB); included if >= 6.0. '<res' = not above the noise floor.
+P1 (37.5, 42.5) mm: E median -21.7 dB, 90% CI [-22.5, -16.7] (width 5.8 dB); X median -20.8 dB; n = 3 subjects; protocol verdict FAIL(FEW)
+P2 (40.0, 45.0) mm: E median -20.3 dB, 90% CI [-24.6, -18.1] (width 6.5 dB); X median -20.3 dB; n = 3 subjects; protocol verdict FAIL(FEW+WIDE)
+analysis time 31 s
+ANALYSIS_SECONDS 32
+TOTAL_SECONDS 305
+exit 0
