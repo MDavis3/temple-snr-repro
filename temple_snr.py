@@ -283,23 +283,25 @@ def make_figure(results, pops, path, cfg=CONFIG):
     import matplotlib
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
-    fig, ax = plt.subplots(1, 2, figsize=(11.5, 4.3))
+    fig, ax = plt.subplots(1, 2, figsize=(13.5, 4.8))
     dg = cfg["depth_gates"]; z = [np.mean(v) for v in dg.values()]
+    cmap = plt.get_cmap("tab20")
+    colors = {r["recording"]: cmap(i % 20) for i, r in enumerate(results)}   # distinct colour per recording (up to 20)
     for r in results:
         y = [r["gates"][g]["E_db"] if r["gates"][g]["E_db"] is not None else np.nan for g in dg]
         inc = r["passes_contamination"]
-        ax[0].plot(z, y, "-o" if inc else ":x", ms=4, lw=1.2 if inc else 0.8, color=None if inc else "0.6",
+        ax[0].plot(z, y, "-o" if inc else ":x", ms=4, lw=1.2 if inc else 0.8, color=colors[r["recording"]] if inc else "0.6",
                    label=r["recording"] + ("" if inc else " (excluded: C)"))
     med = [population(results, g, cfg, boot=False).get("median_db") for g in dg]
     if any(v is not None for v in med):
         ax[0].plot(z, [v if v is not None else np.nan for v in med], "k-", lw=2.5, label="median, included subjects")
     ax[0].set(xlabel="gate centre depth (mm)", ylabel="blood SNR per element per transmit (dB)",
               title="Contrast-free blood SNR vs depth (estimator E)")
-    ax[0].legend(fontsize=7); ax[0].grid(alpha=0.3)
+    ax[0].legend(fontsize=6, loc="upper left", bbox_to_anchor=(1.01, 1.0), borderaxespad=0); ax[0].grid(alpha=0.3)
     k = np.ones(9) / 9
     for r in results:                           # 9-bin moving average; reflect padding avoids a false dip at the edges
         s = r["spectrum_P1"]; sm = np.convolve(np.pad(s["power_over_noise"], 4, mode="reflect"), k, "valid")
-        ax[1].plot(s["f_hz"], 10 * np.log10(sm), lw=0.7, label=r["recording"])
+        ax[1].plot(s["f_hz"], 10 * np.log10(sm), lw=0.7, color=colors[r["recording"]])   # recordings labelled in the left legend
     for sg in (-1, 1):
         ax[1].axvspan(sg * cfg["blood_band_hz"][0], sg * cfg["blood_band_hz"][1], color="tab:red", alpha=0.07,
                       label="blood band" if sg > 0 else None)
@@ -309,7 +311,7 @@ def make_figure(results, pops, path, cfg=CONFIG):
     ax[1].set(xlabel="slow-time (Doppler) frequency (Hz)", ylabel="power / noise floor (dB, 9-bin smoothed)", ylim=(-0.5, 3),
               title="Mean spectrum, P1 gate 37.5-42.5 mm (shown without the notch)\n"
                     "spikes at +-1000 and -2000 Hz are scanner lines, notched (+-8 Hz) before SNR")
-    ax[1].title.set_fontsize(9); ax[1].legend(fontsize=7, loc="upper right"); ax[1].grid(alpha=0.3)
+    ax[1].title.set_fontsize(9); ax[1].legend(fontsize=7, loc="lower center", bbox_to_anchor=(0.5, -0.32), ncol=3); ax[1].grid(alpha=0.3)
     fig.tight_layout(); fig.savefig(path, dpi=130); plt.close(fig)
 
 

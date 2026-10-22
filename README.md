@@ -2,7 +2,7 @@
 
 Reproduce one number yourself, from public data: **the signal-to-noise ratio of contrast-free blood on a single ultrasound receive element, per transmitted pulse, through the adult temporal bone at about 40 mm depth.**
 
-**Result on all 20 recordings (10 subjects):** −22.4 dB at 37.5–42.5 mm (90 % CI −24.8 to −18.9 dB). The pre-set precision rule was **not** met at 40–45 mm (CI 6.45 dB wide, limit 6.0 dB), so the formal verdict is **FAIL(WIDE)**. Details are in [Full result](#full-result-all-20-recordings).
+**Result on all 20 recordings (10 subjects):** −22.4 dB at 37.5–42.5 mm (90 % CI −24.8 to −18.9 dB). The pre-set precision rule was **not** met at 40–45 mm (CI 6.45 dB wide, limit 6.0 dB), so the formal verdict is **FAIL** (the script prints `FAIL`; the failing criterion is P2 width, shown as `FAIL(WIDE)` on the P2 line). Details are in [Full result](#full-result-all-20-recordings).
 
 ## Data
 
@@ -73,7 +73,7 @@ Quick run (4 recordings), measured on 2026-10-21 (our run plus one independent r
 | **total** | **about 5 min** |
 | notebook, executed end-to-end with `jupyter nbconvert --execute` in a second fresh venv (data already present) | 46–66 s |
 
-The download is almost all of the time, so it scales with your bandwidth. Analysis takes about 6–11 s per recording and peaks at about 2.1 GB of RAM. For all 20 recordings, expect about 19 GB and roughly 20 min of download at 40 MB/s, plus about 3 min of analysis. This is scaled from the quick run; we did not time a full 20-recording run with this package.
+The download is almost all of the time, so it scales with your bandwidth. Analysis takes about 6–11 s per recording and peaks at about 2.1 GB of RAM. For all 20 recordings (`--all`), a cold run on 2026-10-22 (fresh clone and venv, MacBook, Apple silicon) downloaded 18.8 GB in 20.1 min (about 16 MB/s effective, including chunk verification) and analysed all 20 in about 2 min: about 24 min in total, reproducing every number below exactly.
 
 ## What the analysis computes (estimator E, primary)
 
@@ -103,9 +103,9 @@ Our full analysis applied the same frozen definitions to all 20 recordings, usin
 | gate | subjects (recordings) | E median | 90 % CI | CI width | X median | verdict |
 |---|---|---|---|---|---|---|
 | P1 37.5–42.5 mm | 10 (19) | **−22.4 dB** | −24.8 to −18.9 dB | 5.90 dB | −22.1 dB | PASS |
-| P2 40–45 mm | 10 (19) | **−22.6 dB** | −25.5 to −19.1 dB | **6.45 dB** | −23.2 dB | FAIL(WIDE) |
+| P2 40–45 mm | 10 (19) | **−22.6 dB** | −25.5 to −19.1 dB | **6.45 dB** (prints as 6.5) | −23.2 dB | FAIL(WIDE) |
 
-**Overall verdict under the pre-set rule: FAIL(WIDE).** P2's CI exceeded the 6.0 dB limit. All other criteria were met at both gates.
+**Overall verdict under the pre-set rule: FAIL** (P2 is `FAIL(WIDE)`: its CI, printed as 6.5 dB and 6.453 dB in the JSON, exceeded the 6.0 dB limit). All other criteria were met at both gates.
 - **The P1 pass is marginal.** Its CI clears the limit by only 0.1 dB, and a ±1-sample gate shift makes it 6.2–6.6 dB (WIDE). The fair summary is that the CI width sits at about 6 dB at both depths.
 - **The width comes from recording-to-recording variation, not from the estimator.** Two recordings of the same subject differ by an SD of about 5.4 dB at P1. Splitting one recording's elements in half changes the value by only about 1 dB. A narrower CI therefore needs more recordings or subjects, not a better estimator.
 - **Subjects differ.** Subject values at P1 span −28.2 to −13.5 dB (5–95 %: −27.4 to −14.7 dB). The two estimators agree within 1.4 dB at every depth. The value falls from about −17 dB at 30–35 mm to about −24 dB at 45–60 mm.

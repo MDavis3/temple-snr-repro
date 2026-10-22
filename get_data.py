@@ -5,7 +5,7 @@ Each published HDF5 file is ~5.3 GB (five 1-s clips). We read the file's HDF5 in
 requests, then fetch only the compressed chunks of
   * clip 'baseline_minus1s' (4000 frames, before microbubble arrival)  -> what we measure
   * the first 256 frames of 'baseline_plus10s' (contrast present)      -> contamination check only
-(~1.1 GB per recording). Chunks are copied byte-for-byte into a small local HDF5 (no re-compression).
+(about 0.9-1.0 GB per recording). Chunks are copied byte-for-byte into a small local HDF5 (no re-compression).
 
 Verification per recording: (a) every chunk decodes to a full (320, 256, 2) int16 frame; (b) every chunk stored
 in clip.h5 is byte-identical to the downloaded bytes; (c) 32 random chunks fetched again from the server are
