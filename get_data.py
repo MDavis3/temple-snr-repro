@@ -13,7 +13,12 @@ byte-identical; (d) the server's file size equals the size the index was read fr
 written to manifest.json (compare yours with someone else's).
 Resumable: downloaded pieces are kept until the recording verifies; rerun the same command to continue.
 
-usage: python get_data.py [--n 4 | --all | --recordings SP01-Left-1 ...] [--data-dir data]
+--refs (optional, needed only by whitening/whitening.py) also saves <rec>/refs.npz: the vendor reference volume
+`custom/computed_references/mvi` (made by the scanner software from the whole contrast bolus), the axis vectors of its
+Cartesian grid, and the per-element transmit delays `t0_delays` (about 22 MB of range reads per recording). It works on
+recordings that are already downloaded and never touches clip.h5.
+
+usage: python get_data.py [--n 4 | --all | --recordings SP01-Left-1 ...] [--data-dir data] [--refs]
   --n K   the first K names of RECORDINGS (K = 1..20): K <= 10 gives one recording per subject (the first listed),
           K = 20 is the full study (10 subjects x 2 recordings, about 19 GB). --all is the same as --n 20.
 """
@@ -221,6 +226,28 @@ def get_recording(name, data_dir, n_refetch=N_REFETCH, keep_pieces=False):
     return rep
 
 
+def get_refs(name, data_dir):
+    """<rec>/refs.npz: vendor mvi volume [z, y, x], its grid axes (m) and t0_delays (s). Skipped if already present."""
+    out = os.path.join(data_dir, name, "refs.npz")
+    if os.path.exists(out):
+        print(f"{name}: refs.npz already present"); return True
+    os.makedirs(os.path.dirname(out), exist_ok=True)
+    rf = RemoteFile(URL.format(name))
+    with h5py.File(rf, "r") as f:
+        mvi = f["custom/computed_references/mvi"][()].astype(np.float32)               # (192, 171, 171) [z, y, x]
+        c = f["custom/computed_references/coordinates"][()]                             # (192, 171, 171, 3) [x, y, z] m
+        t0 = np.asarray(f["tracks/track_0/scan/t0_delays"][()], np.float64).ravel()    # (256,)
+    x, y, z = c[0, 0, :, 0], c[0, :, 0, 1], c[:, 0, 0, 2]
+    dev = max(np.abs(c[..., 0] - x[None, None, :]).max(), np.abs(c[..., 1] - y[None, :, None]).max(),
+              np.abs(c[..., 2] - z[:, None, None]).max())
+    assert dev < 1e-6 and mvi.shape == c.shape[:3], f"mvi grid is not separable (max deviation {dev} m)"
+    np.savez(out + ".tmp.npz", mvi=mvi, mvi_x=x.astype(np.float64), mvi_y=y.astype(np.float64), mvi_z=z.astype(np.float64),
+             t0_delays=t0, source_url=URL.format(name), mvi_sha256=hashlib.sha256(mvi.tobytes()).hexdigest())
+    os.replace(out + ".tmp.npz", out)
+    print(f"{name}: refs.npz saved (mvi {mvi.shape}, {len(rf.cache)} MiB read)")
+    return True
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--n", type=int, default=4, help="first N names of the fixed list (default 4; 10 = one per subject; 20 = all)")
@@ -229,6 +256,8 @@ def main(argv=None):
     ap.add_argument("--data-dir", default="data")
     ap.add_argument("--refetch", type=int, default=N_REFETCH)
     ap.add_argument("--keep-pieces", action="store_true")
+    ap.add_argument("--refs", action="store_true", help="also save refs.npz (vendor mvi + grid + t0_delays, ~22 MB/recording; "
+                    "needed only by whitening/whitening.py)")
     a = ap.parse_args(argv)
     if a.recordings:
         bad = [n for n in a.recordings if n not in RECORDINGS]
@@ -244,6 +273,9 @@ def main(argv=None):
     t0 = time.time()
     try:
         reps = [get_recording(n, a.data_dir, a.refetch, a.keep_pieces) for n in names]
+        if a.refs:
+            for n in names:
+                get_refs(n, a.data_dir)
     except KeyboardInterrupt:
         print("\ninterrupted; finished pieces are kept - rerun the same command to resume"); return 130
     print(f"done in {(time.time() - t0) / 60:.1f} min; verified {sum(r['ok'] for r in reps)}/{len(reps)}")

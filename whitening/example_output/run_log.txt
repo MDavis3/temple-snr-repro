@@ -1,0 +1,74 @@
+# python whitening/whitening.py --data-dir data --out results/whitening --recordings SP04-Left-2 SP06-Left SP08-Left SP09-Left-1 SP01-Left-2 --draws 20
+# MacBook (Apple silicon), 8 threads, other jobs running; wall time 22 min 43 s
+[    4.0s] cross-subject whitening matrix from SP01-Left-2 (8 blocks)
+[    4.0s] SP04-Left-2: PRF 3999.9998 Hz; B* 124 bins 256-744 Hz; W* 124 bins 1256-1744 Hz
+[   10.8s] SP04-Left-2: covariances done; 3 arms + 20 random draws per block
+[   43.8s] SP04-Left-2: block 0 done
+[   77.4s] SP04-Left-2: block 1 done
+[  111.5s] SP04-Left-2: block 2 done
+[  145.4s] SP04-Left-2: block 3 done
+[  178.9s] SP04-Left-2: block 4 done
+[  211.9s] SP04-Left-2: block 5 done
+[  245.6s] SP04-Left-2: block 6 done
+[  278.4s] SP04-Left-2: block 7 done
+[  278.4s] SP04-Left-2: dCNR +0.8270 (frozen 0.826954), 274 s
+[  278.4s] SP06-Left: PRF 3999.9998 Hz; B* 124 bins 256-744 Hz; W* 124 bins 1256-1744 Hz
+[  285.3s] SP06-Left: covariances done; 3 arms + 20 random draws per block
+[  318.2s] SP06-Left: block 0 done
+[  351.9s] SP06-Left: block 1 done
+[  385.4s] SP06-Left: block 2 done
+[  420.5s] SP06-Left: block 3 done
+[  453.9s] SP06-Left: block 4 done
+[  488.4s] SP06-Left: block 5 done
+[  521.7s] SP06-Left: block 6 done
+[  555.3s] SP06-Left: block 7 done
+[  555.4s] SP06-Left: dCNR +0.3377 (frozen 0.33771), 277 s
+[  555.4s] SP08-Left: PRF 3999.9998 Hz; B* 124 bins 256-744 Hz; W* 124 bins 1256-1744 Hz
+[  562.3s] SP08-Left: covariances done; 3 arms + 20 random draws per block
+[  595.2s] SP08-Left: block 0 done
+[  628.4s] SP08-Left: block 1 done
+[  661.3s] SP08-Left: block 2 done
+[  694.8s] SP08-Left: block 3 done
+[  727.8s] SP08-Left: block 4 done
+[  760.4s] SP08-Left: block 5 done
+[  794.4s] SP08-Left: block 6 done
+[  827.1s] SP08-Left: block 7 done
+[  827.1s] SP08-Left: dCNR -0.1336 (frozen -0.133558), 272 s
+[  827.1s] SP09-Left-1: PRF 3999.9998 Hz; B* 124 bins 256-744 Hz; W* 124 bins 1256-1744 Hz
+[  834.0s] SP09-Left-1: covariances done; 3 arms + 20 random draws per block
+[  866.9s] SP09-Left-1: block 0 done
+[  900.0s] SP09-Left-1: block 1 done
+[  932.7s] SP09-Left-1: block 2 done
+[  966.4s] SP09-Left-1: block 3 done
+[  999.3s] SP09-Left-1: block 4 done
+[ 1033.5s] SP09-Left-1: block 5 done
+[ 1066.4s] SP09-Left-1: block 6 done
+[ 1100.7s] SP09-Left-1: block 7 done
+[ 1100.8s] SP09-Left-1: dCNR +0.4510 (frozen 0.451024), 274 s
+[ 1100.8s] SP01-Left-2: PRF 3999.9998 Hz; B* 124 bins 256-744 Hz; W* 124 bins 1256-1744 Hz
+[ 1107.7s] SP01-Left-2: covariances done; 2 arms + 20 random draws per block
+[ 1139.7s] SP01-Left-2: block 0 done
+[ 1171.1s] SP01-Left-2: block 1 done
+[ 1203.5s] SP01-Left-2: block 2 done
+[ 1235.1s] SP01-Left-2: block 3 done
+[ 1266.8s] SP01-Left-2: block 4 done
+[ 1298.3s] SP01-Left-2: block 5 done
+[ 1330.3s] SP01-Left-2: block 6 done
+[ 1361.9s] SP01-Left-2: block 7 done
+[ 1361.9s] SP01-Left-2: dCNR -0.0715 (frozen -0.071486), 261 s
+
+recording      CNR nom  CNR wht    dCNR  frozen   |diff|   cross  noise dB  blood dB  draws  frac<wht
+SP04-Left-2      2.211    3.038 +0.8270 +0.8270  1.6e-07  +0.812     -1.10     +0.03     20      1.00
+SP06-Left        0.656    0.994 +0.3377 +0.3377  6.1e-07  +0.317     -1.10     +0.51     20      1.00
+SP08-Left        3.658    3.524 -0.1336 -0.1336  7.4e-07  -0.172     -0.78     +0.29     20      0.30
+SP09-Left-1      3.345    3.796 +0.4510 +0.4510  3.4e-08  +0.489     -1.21     -0.07     20      1.00
+SP01-Left-2     -0.000   -0.072 -0.0715 -0.0715  5.7e-08       -     -0.84      +nan     20      0.00
+dCNR = CNR(whitened) - CNR(nominal); frozen = the frozen confirmatory run; cross = whitening matrix from SP01-Left-2;
+noise dB = ROI-median noise-floor change; blood dB = vessel-mask blood excess (B* - W*) change; frac<wht = fraction of random draws with a lower dCNR.
+
+held-out subjects complete: SP04 | incomplete: SP06, SP08, SP09
+(partial set: 1 of 8 held-out subjects complete; the numbers below are not the study result)
+median subject dCNR +0.827, 90% CI [+0.827, +0.827], 1/1 positive; p vs 20 random draws = 0.0476
+noise floor -1.10 dB; blood excess +0.03 dB; cross-subject matrix: median +0.812
+verdict: not computed (needs all 15 held-out recordings and the SP01-Left-2 control)
+[ 1362.2s] wrote results/whitening/whitening_results.json and whitening.png
