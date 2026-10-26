@@ -4,6 +4,8 @@ Reproduce one number yourself, from public data: **the signal-to-noise ratio of 
 
 **Result on all 20 recordings (10 subjects):** −22.4 dB at 37.5–42.5 mm (90 % CI −24.8 to −18.9 dB). The pre-set precision rule was **not** met at 40–45 mm (CI 6.45 dB wide, limit 6.0 dB), so the formal verdict is **FAIL** (the script prints `FAIL`; the failing criterion is P2 width, shown as `FAIL(WIDE)` on the P2 line). Details are in [Full result](#full-result-all-20-recordings).
 
+**Noise-band check:** fast blood does reach the 1500–2000 Hz noise band (pointed out by Maxence Reberol, Resolve Stroke); measured, it moves the result by about +0.1 dB, to about −22.2 dB. See [Check](#check-blood-in-the-noise-band).
+
 **Second result, same data:** whitening the correlated receive-channel noise before beamforming lowers the noise floor of contrast-free power Doppler maps by about 1 dB and raises vessel contrast slightly (median CNR gain +0.16 in 8 held-out subjects; pre-registered verdict **PASS**, reproduced independently). It is a re-test on recordings already seen, not an independent replication. See [Second result](#second-result-receive-noise-whitening-1-db) and `whitening/`.
 
 ## Data
@@ -86,7 +88,7 @@ For each recording:
 3. **Slow-time spectrum** of each cell: remove the mean over frames, apply a 4-term Blackman–Harris window, then a 4000-point FFT, giving 1 Hz bins. Each element's spectrum is the average over its gate samples.
 4. **Notch artefact lines.** Narrow scanner lines sit at exactly k·PRF/4 (1000, 2000, 3000 ≡ −1000 Hz). They are not blood. Bins within ±8 Hz of these lines are removed from every average.
 5. **Clutter filter.** The wall band |f| < 100 Hz holds skull and tissue echo, which is thousands of times stronger than blood. It is excluded.
-6. **Noise.** N = mean spectral density in 1500 ≤ |f| ≤ 2000 Hz, which is white noise at these depths (blood would need more than about 0.57 m/s to reach it).
+6. **Noise.** N = mean spectral density in 1500 ≤ |f| ≤ 2000 Hz. Blood faster than about 0.57 m/s along the beam (for example in the MCA) does reach this band, so it is not pure noise; we measured how much blood is in it and the effect on the result is about +0.1 dB. See [Check: blood in the noise band](#check-blood-in-the-noise-band).
 7. **SNR** per element = (D − N)·2800 / (N·4000), where D = mean density in 100 ≤ |f| < 1500 Hz. This is the blood-band power above the noise floor divided by the noise power per transmit. The recording value is the median over valid elements.
 
 **Cross-check X** takes an independent route. It subtracts the exact period-4 component per cell, which notches k·PRF/4 in the time domain. It then applies a 4th-order Butterworth high-pass at 100 Hz (`sosfiltfilt`) and drops 200 frames at each end. Noise comes from the 4th-order temporal difference, which weights noise near PRF/2. SNR = (P − κσ²)/σ². κ and the difference gain come from the filter's frequency response, not from a simulation (see the notes).
@@ -153,6 +155,22 @@ Synthetic self-test with a true SNR of −22.0 dB: E gave −22.0 dB and X gave 
 - **Data integrity.** The whole-file sha256 cannot be checked because only parts of each file are downloaded. Integrity rests on decoding, byte identity and re-fetch checks. Your `data/<rec>/manifest.json` lists the sha256 of every chunk, so you can compare it with someone else's.
 - **Depth.** The depth-to-sample mapping assumes c = 1540 m/s and the given virtual source. A ±1 sample error is 0.4 mm.
 - **Download.** Ctrl-C stops cleanly and keeps finished pieces; rerun the same command to resume.
+
+## Check: blood in the noise band
+
+Maxence Reberol (Resolve Stroke) pointed out that fast blood flow, for example in the middle cerebral artery, reaches 1500–2000 Hz, so that band is not a clean noise reference. He is right about the physics: the vendor's contrast velocity maps show radial speeds above 0.57 m/s in 13–73 % of vessel voxels. The original analysis did not test this. We then measured how much blood actually lands in that band, on all 19 included recordings. κ is the blood density in 1500–2000 Hz as a fraction of the blood density in 100–1500 Hz.
+
+| test | κ | what it shows |
+|---|---|---|
+| Direction (blood flows one way, receiver noise is symmetric) | 0.033 ± 0.011 | The noise band stays symmetric even where the blood band is strongly one-sided (31 % in SP08-Left) |
+| Pulsatility (twenty 50-ms windows over the clip) | 0.012 ± 0.012 at P1 | No heartbeat-linked power in the noise band at 37.5–42.5 mm, while 1100–1400 Hz does pulse (about 0.1), so the test can see blood when it is there |
+| Depth profile | 0.029 ± 0.022 | No rise in the noise band at typical MCA depths (45–65 mm) |
+
+**Effect on the result.** With κ ≈ 0.03 the P1 value moves from −22.4 to about **−22.2 dB** (90 % CI about −24.7 to −18.8 dB); even κ = 0.10 gives −21.9 dB. The bias is in the conservative direction (blood in the noise reference makes the reported SNR slightly too low). Other noise references give −21.4 to −22.7 dB. Cross-check X weights noise near 2000 Hz and shares the same ~0.1 dB bias. The whitening result is not materially affected (blood is about 0.1–0.2 % of the power in its 1250–1750 Hz noise band, and a whitening matrix from a recording with no detectable blood works as well).
+
+**Side finding.** The receiver noise in the clinical clips is about 1.5× the noise in the static phantom recorded on the same system (ratio 1.52, flat from 25 to 120 mm, and the same in a recording with no detectable blood). It does not come from blood. Against phantom-level noise the per-channel SNR would be about 1.8 dB higher. The phantom file holds only 128 usable frames, so this comparison is coarse.
+
+The code and per-recording outputs of this check are in the campaign's working files, not in this package.
 
 ## Second result: receive-noise whitening (+1 dB)
 
