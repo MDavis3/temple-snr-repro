@@ -4,6 +4,8 @@ Reproduce one number yourself, from public data: **the signal-to-noise ratio of 
 
 **Result on all 20 recordings (10 subjects):** −22.4 dB at 37.5–42.5 mm (90 % CI −24.8 to −18.9 dB). The pre-set precision rule was **not** met at 40–45 mm (CI 6.45 dB wide, limit 6.0 dB), so the formal verdict is **FAIL** (the script prints `FAIL`; the failing criterion is P2 width, shown as `FAIL(WIDE)` on the P2 line). Details are in [Full result](#full-result-all-20-recordings).
 
+![Blood SNR vs depth and mean spectrum, all 20 recordings](example_output/full_20/temple_snr.png)
+
 **Noise-band check:** fast blood does reach the 1500–2000 Hz noise band (pointed out by Maxence Reberol, Resolve Stroke); measured, it moves the result by about +0.1 dB, to about −22.2 dB. See [Check](#check-blood-in-the-noise-band).
 
 **Second result, same data:** whitening the correlated receive-channel noise before beamforming lowers the noise floor of contrast-free power Doppler maps by about 1 dB and raises vessel contrast slightly (median CNR gain +0.16 in 8 held-out subjects; pre-registered verdict **PASS**, reproduced independently). It is a re-test on recordings already seen, not an independent replication. See [Second result](#second-result-receive-noise-whitening-1-db) and `whitening/`.
@@ -27,7 +29,7 @@ Nothing here depends on any other repository. Four files do the work:
 | `temple_snr.py` | decodes the frames, applies the depth gates, notches the artefact lines, applies the clutter filter, estimates noise, and computes SNR per element, gate, recording and subject. It prints the tables and saves one figure. All analysis choices are in one `CONFIG` block at the top of the file |
 | `temple_snr.ipynb` | calls both scripts and explains each step in plain language |
 | `LICENSE` | MIT licence for the code |
-| `example_output/` | the figure, JSON and log from our quick run (below), for comparison with yours |
+| `example_output/` | the figure, JSON and log from our quick run (below), for comparison with yours. `example_output/full_20/` holds the same outputs for all 20 recordings |
 | `whitening/` | the second result: `whitening.py` (receive-noise whitening of 3-D power Doppler maps) and its `example_output/`. See [Second result](#second-result-receive-noise-whitening-1-db) |
 
 ## Quick start
@@ -114,7 +116,7 @@ Our full analysis applied the same frozen definitions to all 20 recordings, usin
 - **The P1 pass is marginal.** Its CI clears the limit by only 0.1 dB, and a ±1-sample gate shift makes it 6.2–6.6 dB (WIDE). The fair summary is that the CI width sits at about 6 dB at both depths.
 - **The width comes from recording-to-recording variation, not from the estimator.** Two recordings of the same subject differ by an SD of about 5.4 dB at P1. Splitting one recording's elements in half changes the value by only about 1 dB. A narrower CI therefore needs more recordings or subjects, not a better estimator.
 - **Subjects differ.** Subject values at P1 span −28.2 to −13.5 dB (5–95 %: −27.4 to −14.7 dB). The two estimators agree within 1.4 dB at every depth. The value falls from about −17 dB at 30–35 mm to about −24 dB at 45–60 mm.
-- **Check against this package.** We checked that this package gives the same result in two ways, without running it end-to-end on all 20 downloads. (1) It reproduced 5 of the 20 recordings (the quick-run 4 and SP03-Right) to within 0.1 dB. (2) Its aggregation code, fed the full analysis's per-element values, returns the numbers above exactly.
+- **Check against this package.** This package, run end-to-end on all 20 downloads in a fresh virtual environment on 2026-10-30, returns the numbers above, with the same overall verdict. Its figure, JSON and log are in `example_output/full_20/`.
 
 ## Result of our quick run (4 recordings, printed table verbatim)
 
@@ -130,7 +132,7 @@ P1 (37.5, 42.5) mm: E median -21.7 dB, 90% CI [-22.5, -16.7] (width 5.8 dB); X m
 P2 (40.0, 45.0) mm: E median -20.3 dB, 90% CI [-24.6, -18.1] (width 6.5 dB); X median -20.3 dB; n = 3 subjects; protocol verdict FAIL(FEW+WIDE)
 ```
 
-The current script also prints a per-subject block before the two summary lines, and an overall verdict line after them. Here each subject has one recording, so the subject values equal the recording values. The overall verdict is FAIL. The figure in `example_output/` was made with an earlier version, whose 9-bin smoothing zero-padded the spectrum edges and drew a false dip near ±2000 Hz. The current version uses reflect padding.
+The current script also prints a per-subject block before the two summary lines, and an overall verdict line after them. Here each subject has one recording, so the subject values equal the recording values. The overall verdict is FAIL. The quick-run figure in `example_output/` was made with an earlier version, whose 9-bin smoothing zero-padded the spectrum edges and drew a false dip near ±2000 Hz. The current version uses reflect padding.
 
 Synthetic self-test with a true SNR of −22.0 dB: E gave −22.0 dB and X gave −21.8 dB on the 30–60 mm gate, which is the gate that is tested. The self-test also prints P1 and P2 values marked "(info, not tested)". On one synthetic recording a 5-mm gate scatters by about ±0.5–1 dB from sampling noise alone, so P1 E = −22.9 dB is expected and not a failure. SP04-Left-1 fails the contamination check (3.7 dB). All 4 × 4256 chunks decoded, were byte-identical when stored, and 32/32 re-fetched chunks per recording matched. `example_output/temple_snr.png` shows SNR against depth and the mean un-notched spectrum, where the ±1000 Hz and −2000 Hz lines are visible.
 
@@ -170,7 +172,7 @@ Maxence Reberol (Resolve Stroke) pointed out that fast blood flow, for example i
 
 **Side finding.** The receiver noise in the clinical clips is about 1.5× the noise in the static phantom recorded on the same system (ratio 1.52, flat from 25 to 120 mm, and the same in a recording with no detectable blood). It does not come from blood. Against phantom-level noise the per-channel SNR would be about 1.8 dB higher. The phantom file holds only 128 usable frames, so this comparison is coarse.
 
-The code and per-recording outputs of this check are in the campaign's working files, not in this package.
+The code and per-recording outputs of this check are not included in this package.
 
 ## Second result: receive-noise whitening (+1 dB)
 
@@ -256,7 +258,7 @@ Peak memory is about 8–10 GB (`--batch 2`; lower it to 1 to save about 1 GB). 
 
 ### Our reproduction (`whitening/example_output/`)
 
-We ran `whitening.py` on 4 held-out recordings and the control, with 20 random draws each. These came from the campaign's local copy of the same Open-H-RF chunks, repackaged into the `get_data.py` format without re-downloading; `refs.npz` was fetched with `get_data.py --refs`, and its `mvi` and `t0_delays` are bit-identical to the local copy.
+We ran `whitening.py` on 4 held-out recordings and the control, with 20 random draws each. These came from our local copy of the same Open-H-RF chunks, repackaged into the `get_data.py` format without re-downloading; `refs.npz` was fetched with `get_data.py --refs`, and its `mvi` and `t0_delays` are bit-identical to the local copy.
 
 | recording | CNR nominal | CNR whitened | dCNR, ours | dCNR, frozen | cross-subject arm, ours (checker) | noise floor | blood |
 |---|---|---|---|---|---|---|---|
